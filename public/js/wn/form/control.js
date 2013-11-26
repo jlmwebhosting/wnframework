@@ -103,19 +103,24 @@ wn.ui.form.ControlImage = wn.ui.form.Control.extend({
 	make: function() {
 		this._super();
 		var me = this;
+		this.$image_wrapper = $("<div>")
+			.appendTo(this.$wrapper)
+			.css({"margin-bottom": "10px", "margin-right": "15px", "float": "right", "text-align": "right"})
+
 		this.$wrapper
-		.css({"margin-bottom": "10px", "margin-right": "15px", "float": "right", "text-align": "right"})
-		.on("refresh", function() {
-			me.$wrapper.empty();
-			if(me.df.options && me.frm.doc[me.df.options]) {
-				$("<img src='"+me.frm.doc[me.df.options]+"' style='max-width: 70%;'>")
-					.appendTo(me.$wrapper);
-			} else {
-				$("<div class='missing-image'><i class='icon-camera'></i></div>")
-					.appendTo(me.$wrapper)
-			}
-			return false;
-		})
+			.on("refresh", function() {
+				me.$image_wrapper.empty();
+				if(me.df.options && me.frm.doc[me.df.options]) {
+					$("<img src='"+me.frm.doc[me.df.options]+"' style='max-width: 70%;'>")
+						.appendTo(me.$image_wrapper);
+				} else {
+					$("<div class='missing-image'><i class='icon-camera'></i></div>")
+						.appendTo(me.$image_wrapper)
+				}
+				return false;
+			})
+			
+		$('<div class="clearfix">').appendTo(this.$wrapper);
 	}
 });
 
