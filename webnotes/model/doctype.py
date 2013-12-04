@@ -228,11 +228,9 @@ def cache_name(doctype, processed):
 	return "doctype:" + doctype + suffix
 
 def clear_cache(doctype=None):
-	import webnotes.plugins
 	def clear_single(dt):
 		webnotes.cache().delete_value(cache_name(dt, False))
 		webnotes.cache().delete_value(cache_name(dt, True))
-		webnotes.plugins.clear_cache("DocType", dt)
 
 		if doctype_cache and doctype in doctype_cache:
 			del doctype_cache[dt]

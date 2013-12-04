@@ -4,6 +4,7 @@ import json
 sys.path.insert(0, '.')
 sys.path.insert(0, 'app')
 sys.path.insert(0, 'lib')
+sys.path.insert(0, 'plugins')
 
 from werkzeug.wrappers import Request, Response
 from werkzeug.local import LocalManager

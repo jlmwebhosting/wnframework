@@ -19,7 +19,7 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 	# for test
 	import webnotes
 	from webnotes.modules import scrub, get_doctype_module
-	from webnotes.plugins import get_code_and_execute
+	from webnotes.plugins import get_plugin_controller
 
 	# get doctype details
 	module = get_doctype_module(doc.doctype) or "core"
@@ -33,10 +33,9 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 		return DocType(doc, doclist)
 
 	# custom?
-	namespace = {"DocType": DocType}
-	get_code_and_execute(module, "DocType", doc.doctype, namespace=namespace)
-	if namespace.get("CustomDocType"):
-		return namespace["CustomDocType"](doc, doclist)
+	plugin_controller = get_plugin_controller(doc.doctype)
+	if plugin_controller:
+		return plugin_controller(doc, doclist)
 	else:
 		return DocType(doc, doclist)
 

@@ -72,8 +72,6 @@ def setup_parser():
 		help="Don't show verbose output where applicable")
 	parser.add_argument("--site", nargs="?", metavar="SITE-NAME or all",
 		help="Run for a particular site")
-	parser.add_argument("--plugin", nargs="?", metavar="PLUGIN-NAME",
-		help="Run for a particular plugin")
 		
 	return parser.parse_args()
 	
@@ -281,7 +279,6 @@ def update(remote=None, branch=None, site=None, reload_gunicorn=False):
 def latest(site=None, verbose=True):
 	import webnotes.modules.patch_handler
 	import webnotes.model.sync
-	import webnotes.plugins
 	from website.doctype.website_sitemap_config.website_sitemap_config import build_website_sitemap_config
 	
 	webnotes.connect(site=site)
@@ -295,10 +292,7 @@ def latest(site=None, verbose=True):
 	
 		# sync
 		webnotes.model.sync.sync_all()
-		
-		# remove __init__.py from plugins
-		webnotes.plugins.remove_init_files()
-		
+				
 		# build website config if any changes in templates etc.
 		build_website_sitemap_config()
 		
@@ -336,9 +330,9 @@ def update_all_sites(remote=None, branch=None, verbose=True):
 		latest(site=site, verbose=verbose)
 
 @cmd
-def reload_doc(module, doctype, docname, plugin=None, site=None, force=False):
+def reload_doc(module, doctype, docname, site=None, force=False):
 	webnotes.connect(site=site)
-	webnotes.reload_doc(module, doctype, docname, plugin=plugin, force=force)
+	webnotes.reload_doc(module, doctype, docname, force=force)
 	webnotes.conn.commit()
 	webnotes.destroy()
 
@@ -404,12 +398,6 @@ def make_conf(db_name=None, db_password=None, site=None, site_config=None):
 	from webnotes.install_lib.install import make_conf
 	make_conf(db_name=db_name, db_password=db_password, site=site, site_config=site_config)
 	
-@cmd
-def make_custom_server_script(doctype, site=None):
-	from core.doctype.custom_script.custom_script import make_custom_server_script_file
-	webnotes.connect(site=site)
-	make_custom_server_script_file(doctype)
-	webnotes.destroy()
 
 # clear
 @cmd

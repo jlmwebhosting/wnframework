@@ -475,7 +475,10 @@ def get_method(method_string):
 	methodname = method_string.split('.')[-1]
 
 	return getattr(get_module(modulename), methodname)
-	
+
+def scrub():
+	return txt.replace(' ','_').replace('-', '_').replace('/', '_').lower()
+
 def make_property_setter(args):
 	args = _dict(args)
 	bean([{

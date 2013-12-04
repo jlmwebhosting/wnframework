@@ -11,7 +11,7 @@ from webnotes import _
 from webnotes.modules import scrub, get_module_path
 from webnotes.utils import flt, cint
 import webnotes.widgets.reportview
-import webnotes.plugins
+import webnotes.plugins import get_report_js, get_report_module
 
 @webnotes.whitelist()
 def get_script(report_name):
@@ -28,7 +28,7 @@ def get_script(report_name):
 			script = script.read()
 	
 	if not script and report.is_standard == "No":
-		script = webnotes.plugins.read_file(module, "Report", report.name, extn="js", cache=True)
+		script = webnotes.plugins.get_plugin_asset("reports", "js", report.name)
 
 	if not script and report.javascript:
 		script = report.javascript
@@ -42,18 +42,18 @@ def get_script(report_name):
 		if os.path.exists(report_folder):
 			messages = get_lang_data(report_folder, webnotes.lang, 'js')
 			webnotes.response["__messages"] = messages
-		else:
-			# TODO check if language files get exported here
-			plugins_report_folder = webnotes.plugins.get_path(module, "Report", report.name)
-			if os.path.exists(plugins_report_folder):
-				messages = get_lang_data(plugins_report_folder, webnotes.lang, 'js')
-				webnotes.response["__messages"] = messages
+		# TODO translations for plugins
+		# else:
+		# 	plugins_report_folder = webnotes.plugins.get_path(module, "Report", report.name)
+		# 	if os.path.exists(plugins_report_folder):
+		# 		messages = get_lang_data(plugins_report_folder, webnotes.lang, 'js')
+		# 		webnotes.response["__messages"] = messages
 		
 	return script
 
 @webnotes.whitelist()
 def run(report_name, filters=None):
-	from webnotes.plugins import get_code_and_execute
+	from webnotes.plugins import get_plugin_asset
 	
 	report = webnotes.doc("Report", report_name)
 	
@@ -80,9 +80,9 @@ def run(report_name, filters=None):
 			method_name = scrub(module) + ".report." + scrub(report.name) + "." + scrub(report.name) + ".execute"
 			columns, result = webnotes.get_method(method_name)(filters or {})
 		else:
-			namespace = get_code_and_execute(module, "Report", report.name)
-			columns, result = namespace["execute"](filters or {})
-	
+			report_module = get_plugin_asset("report", "controller", report.name)
+			columns, result = report_module.execute(filters or {})
+				
 	result = get_filtered_data(report.ref_doctype, columns, result)
 	
 	if cint(report.add_total_row) and result:
