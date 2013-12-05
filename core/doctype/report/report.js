@@ -1,4 +1,7 @@
 cur_frm.cscript.refresh = function(doc) {
+	cur_frm.set_df_property("plugin", "read_only", !!!doc.__islocal);
+	cur_frm.cscript.is_standard(doc);
+	
 	cur_frm.add_custom_button("Show Report", function() {
 		switch(doc.report_type) {
 			case "Report Builder":
@@ -30,4 +33,8 @@ cur_frm.cscript.refresh = function(doc) {
 			cur_frm.set_intro(wn._("Write a Python file in the same folder where this is saved and return column and result."))
 			break;
 	}
+}
+
+cur_frm.script.is_standard = function(doc) {
+	cur_frm.set_df_property("plugin", "reqd", doc.is_standard==="No");
 }

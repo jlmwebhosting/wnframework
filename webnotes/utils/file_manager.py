@@ -89,7 +89,7 @@ def save_file(fname, content, dt, dn, decode=False):
 	import filecmp
 	from webnotes.model.code import load_doctype_module
 	files_path = get_site_path(conf.files_path)
-	module = load_doctype_module(dt, webnotes.conn.get_value("DocType", dt, "module"))
+	module = load_doctype_module(dt)
 	
 	if hasattr(module, "attachments_folder"):
 		files_path = os.path.join(files_path, module.attachments_folder)

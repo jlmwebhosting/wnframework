@@ -44,7 +44,8 @@ class DocType:
 			export_to_files(record_list=[['Page', self.doc.name]])
 	
 			# write files
-			path = os.path.join(get_module_path(self.doc.module), 'page', scrub(self.doc.name), scrub(self.doc.name))
+			path = os.path.join(get_module_path(self.doc.module, self.doc.plugin), 
+				'page', scrub(self.doc.name), scrub(self.doc.name))
 								
 			# js
 			if not os.path.exists(path + '.js'):
@@ -64,7 +65,7 @@ class DocType:
 		from webnotes.modules import get_module_path, scrub
 		import os
 		
-		path = os.path.join(get_module_path(self.doc.module), 'page', scrub(self.doc.name))
+		path = os.path.join(get_module_path(self.doc.module, self.doc.plugin), 'page', scrub(self.doc.name))
 
 		# script
 		fpath = os.path.join(path, scrub(self.doc.name) + '.js')

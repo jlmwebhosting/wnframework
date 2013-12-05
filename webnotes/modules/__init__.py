@@ -22,20 +22,22 @@ def scrub_dt_dn(dt, dn):
 
 	return ndt, ndn
 			
-def get_module_path(module):
+def get_module_path(module, plugin=None):
 	"""Returns path of the given module"""
 	m = scrub(module)
 	
-	app_path = webnotes.utils.get_base_path()
+	basepath = webnotes.utils.get_base_path()
 	
-	if m in ('core', 'website'):
-		return os.path.join(app_path, 'lib', m)
+	if plugin:
+		return os.path.join(basepath, "plugins", plugin, m)
+	elif m in ('core', 'website'):
+		return os.path.join(basepath, 'lib', m)
 	else:
-		return os.path.join(app_path, 'app', m)
+		return os.path.join(basepath, 'app', m)
 
-def get_doc_path(module, doctype, name):
+def get_doc_path(plugin, module, doctype, name):
 	dt, dn = scrub_dt_dn(doctype, name)
-	return os.path.join(get_module_path(module), dt, dn)
+	return os.path.join(get_module_path(module, plugin), dt, dn)
 
 def reload_doc(module, dt=None, dn=None, force=True):
 	from webnotes.modules.import_file import import_files

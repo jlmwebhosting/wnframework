@@ -258,7 +258,7 @@ def add_code(doctype, doclist):
 	
 	doc = doclist[0]
 	
-	path = os.path.join(get_module_path(doc.module), 'doctype', scrub(doc.name))
+	path = os.path.join(get_module_path(doc.module, doc.plugin), 'doctype', scrub(doc.name))
 
 	def _add_code(fname, fieldname):
 		fpath = os.path.join(path, fname)
@@ -353,9 +353,9 @@ def update_language(doclist):
 
 		for d in doclist:
 			if d.doctype=='DocType':
-				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+				_messages.update(get_lang_data(get_doc_path(d.plugin, d.module, d.doctype, d.name), 
 					webnotes.lang, 'doc'))
-				_messages.update(get_lang_data(get_doc_path(d.module, d.doctype, d.name), 
+				_messages.update(get_lang_data(get_doc_path(d.plugin, d.module, d.doctype, d.name), 
 					webnotes.lang, 'js'))
 
 		doc = doclist[0]

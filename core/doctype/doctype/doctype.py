@@ -82,7 +82,7 @@ class DocType:
 		# update index
 		if not self.doc.custom:
 			from webnotes.model.code import load_doctype_module
-			module = load_doctype_module( self.doc.name, self.doc.module)
+			module = load_doctype_module(self.doc.name)
 			if hasattr(module, "on_doctype_update"):
 				module.on_doctype_update()
 		webnotes.clear_cache(doctype=self.doc.name)
@@ -119,10 +119,10 @@ class DocType:
 		import_from_files(record_list=[[self.doc.module, 'doctype', self.doc.name]])		
 
 	def make_controller_template(self):
-		from webnotes.modules import get_doc_path, get_module_path, scrub
+		from webnotes.modules import get_module_path, scrub
 		
-		pypath = os.path.join(get_doc_path(self.doc.module, 
-			self.doc.doctype, self.doc.name), scrub(self.doc.name) + '.py')
+		pypath = os.path.join(get_module_path(self.doc.module, self.doc.plugin), 
+			"doctype", scrub(self.doc.name), scrub(self.doc.name) + '.py')
 
 		if not os.path.exists(pypath):
 			with open(pypath, 'w') as pyfile:

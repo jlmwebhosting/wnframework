@@ -3,11 +3,12 @@
 
 from __future__ import unicode_literals
 
-import webnotes, os
+import webnotes, os, json
 from webnotes.utils import get_base_path, get_path
 			
 def get_plugin_asset(group, asset_type, name):
 	load_plugin_mapping()
+	installed_plugins = get_installed_plugins()
 	
 	name = webnotes.scrub(name)
 	
@@ -15,19 +16,20 @@ def get_plugin_asset(group, asset_type, name):
 	
 	if asset==False:
 		if asset_type=="js":
+			asset= ""
 			if name in webnotes.plugin_mapping[group][asset_type]:
-				print os.path.join(get_path("plugins", 
-					webnotes.plugin_mapping[group][asset_type][name]))
+				plugin, asset_path = webnotes.plugin_mapping[group][asset_type][name]
 				
-				with open(os.path.join(get_path("plugins", 
-					webnotes.plugin_mapping[group][asset_type][name])), "r") as assetfile:
-					asset = assetfile.read()
-			else:
-				asset = ""
-				
+				if plugin in installed_plugins:
+					with open(os.path.join(get_path("plugins", asset_path)), "r") as asset_file:
+						asset = asset_file.read()
+
 		elif asset_type=="controller":
+			asset = None
 			if name in webnotes.plugin_mapping[group][asset_type]:
-				asset = webnotes.get_module(webnotes.plugin_mapping[group][asset_type][name])
+				plugin, asset_module = webnotes.plugin_mapping[group][asset_type][name]
+				if plugin in installed_plugins:
+					asset = webnotes.get_module(asset_module)
 			else:
 				asset = None
 			
@@ -50,137 +52,84 @@ def load_plugin_mapping():
 				"controller":{}
 			}
 		}
+		webnotes.plugin_configs = {}
 		plugins_path = get_path("plugins")
 		group = None
 		for basepath, folders, files in os.walk(get_path("plugins")):
-			for f in folders:
-				if f.startswith("."):
-					folders.remove(f)
-			
-			if os.path.basename(basepath) in ("report", "doctype"):
-				group = os.path.basename(basepath)
-			
+			for dontwalk in ('locale', '.git', 'public'):
+				if dontwalk in folders:
+					folders.remove(dontwalk)
+						
 			for item in files:
 				itempath = os.path.join(basepath, item)
+				
+				if item == "config.json":
+					with open(itempath, 'r') as configjson:
+						plugin_config = json.loads(configjson.read())
+					plugin = plugin_config["plugin_name"]
+					plugin_config["path"] = basepath
+					webnotes.plugin_configs[plugin] = plugin_config
+				
+				group = os.path.split(basepath)[-1]
 								
-				if item.endswith(".js"):
-					webnotes.plugin_mapping[group]["js"][item[:-3]] = itempath
+				if group in ('report', 'doctype'):
+					if item.endswith(".js"):
+						webnotes.plugin_mapping[group]["js"][item[:-3]] = (plugin, itempath)
 			
-				if item.endswith(".py") and not item.startswith("_"):
-					webnotes.plugin_mapping[group]["controller"][item[:-3]] = os.path.relpath(itempath, 
-						get_path("plugins")).replace("/", ".")[:-3]
+					if item.endswith(".py") and not item.startswith("_"):
+						webnotes.plugin_mapping[group]["controller"][item[:-3]] = (plugin, 
+							os.path.relpath(itempath, get_path("plugins")).replace("/", ".")[:-3])
 						
 	return webnotes.plugin_mapping
-				
+
+def get_plugin_paths():
+	plugin_paths = []
+	from webnotes.utils import get_path
+	plugins_path = get_path("plugins")
+	for plugin in os.listdir(plugins_path):
+		plugin_path =  os.path.join(plugins_path, plugin)
+		if os.path.isdir(plugin_path):
+			plugin_paths.append(plugin_path)
+			
+	return plugin_paths
+
+def get_installed_plugins():
+	def load_installed_plugins():
+		return json.loads(webnotes.conn.get_global("installed_plugins") or "[]")
+	return webnotes.cache().get_value("installed_plugins", load_installed_plugins)
+
+def set_installed_plugins(plugins):
+	webnotes.conn.set_global("installed_plugins", json.dumps(plugins))
+	webnotes.clear_cache()
+	
+@webnotes.whitelist()
+def install_plugin(plugin_name):
+	webnotes.only_for("System Manager")
+	
+	plugins = get_installed_plugins()
+	
+	
+	
+	plugins.append(plugin_name)
+	set_installed_plugins(plugins)
+
 def clear_cache(doctype=None, docname=None):
 	webnotes.plugin_mapping = None
 	webnotes.plugin_cache = None
+	webnotes.cache().delete_value("installed_plugins")
+	
+@webnotes.whitelist()
+def get_plugin_list():
+	webnotes.only_for("System Manager")
+	load_plugin_mapping()
+	plugin_list = webnotes.plugin_configs.values()
+	plugin_list.sort(lambda a, b: a["plugin_name"] < b["plugin_name"])
+	
+	return {
+		"all": plugin_list,
+		"installed": get_installed_plugins()
+	}
 	
 	
+		
 	
-	
-# 	
-# 
-# def get_code_and_execute(module, doctype, docname, plugin=None, namespace=None):
-# 	code = get_code(module, doctype, docname, plugin)
-# 	return exec_code(code, namespace)
-# 
-# def get_code(module, doctype, docname, plugin=None):	
-# 	try:
-# 		code = read_file(module, doctype, docname, plugin, cache=True)
-# 	except webnotes.SQLError:
-# 		return None
-# 		
-# 	return code
-# 
-# def exec_code(code, namespace=None):
-# 	if namespace is None: namespace = {}
-# 
-# 	if code:
-# 		exec code in namespace
-# 	
-# 	return namespace
-# 				
-# def read_file(module, doctype, docname, plugin=None, extn="py", cache=False):
-# 	import os
-# 	content = None
-# 	
-# 	if cache:
-# 		content = webnotes.cache().get_value(get_cache_key(doctype, docname, extn))
-# 		
-# 	if not content:
-# 		path = get_path(module, doctype, docname, plugin, extn)
-# 		if os.path.exists(path):
-# 			with open(path, 'r') as f:
-# 				content = f.read() or "Does Not Exist"
-# 	
-# 	if cache:
-# 		webnotes.cache().set_value(get_cache_key(doctype, docname, extn), content)
-# 		
-# 	return None if (content == "Does Not Exist") else content
-# 	
-# def get_path(module, doctype, docname, plugin=None, extn="py"):
-# 	from webnotes.modules import scrub
-# 	import os
-# 	
-# 	if not module: module = webnotes.conn.get_value(doctype, docname, "module")
-# 	if not plugin: plugin = get_plugin_name(doctype, docname)
-# 	
-# 	# site_abs_path/plugins/module/doctype/docname/docname.py
-# 	return os.path.join(get_plugin_path(scrub(plugin)), scrub(module),
-# 		scrub(doctype), scrub(docname), scrub(docname) + "." + extn)
-# 
-# def get_plugin_path(plugin=None):
-# 	from webnotes.modules import scrub
-# 	from webnotes.utils import get_site_path
-# 	if not plugin: plugin = get_plugin_name(None, None)
-# 	
-# 	return get_site_path(webnotes.conf.get("plugins_path"), scrub(plugin))
-# 
-# def get_plugin_name(doctype=None, docname=None):
-# 	import os
-# 	from webnotes.utils import get_site_base_path
-# 	plugin = None
-# 	
-# 	if doctype:
-# 		meta = webnotes.get_doctype(doctype)
-# 		if meta.get_field("plugin"):
-# 			plugin = webnotes.conn.get_value(doctype, docname, "plugin")
-# 	
-# 	if not plugin:
-# 		plugin = os.path.basename(get_site_base_path())
-# 
-# 	return plugin
-# 
-# def remove_init_files():
-# 	import os
-# 	from webnotes.utils import get_site_path, cstr
-# 	for path, folders, files in os.walk(get_site_path(webnotes.conf.get("plugins_path"))):
-# 		for f in files:
-# 			# cstr(f) is required when filenames are non-ascii
-# 			if cstr(f) in ("__init__.py", "__init__.pyc"):
-# 				os.remove(os.path.join(path, f))
-# 				
-# def clear_cache(doctype=None, docname=None):
-# 	import os
-# 	from webnotes.utils import get_site_path
-# 	
-# 	def clear_single(dt, dn):
-# 		webnotes.cache().delete_value(get_cache_key(dt, dn, "py"))
-# 		webnotes.cache().delete_value(get_cache_key(dt, dn, "js"))
-# 		
-# 	if not (doctype and docname):
-# 		for path, folders, files in os.walk(get_site_path(webnotes.conf.get("plugins_path"))):
-# 			if files:
-# 				dt = os.path.basename(os.path.dirname(path))
-# 				dn = os.path.basename(path)
-# 				clear_single(dt, dn)
-# 	else:
-# 		clear_single(doctype, docname)
-# 
-# def get_cache_key(doctype, docname, extn="py"):
-# 	from webnotes.modules import scrub
-# 	return "plugin_file:{doctype}:{docname}:{extn}".format(doctype=scrub(doctype), 
-# 		docname=scrub(docname), extn=scrub(extn))
-# 
-# 		

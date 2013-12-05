@@ -15,12 +15,12 @@ def import_files(module, dt=None, dn=None, force=False):
 	else:
 		return import_file(module, dt, dn, force=force)
 		
-def import_file(module, dt, dn, force=False):
+def import_file(module, dt, dn, force=False, plugin=None):
 	"""Sync a file from txt if modifed, return false if not updated"""
 	webnotes.flags.in_import = True
 	dt, dn = scrub_dt_dn(dt, dn)
 	
-	path = os.path.join(get_module_path(module), 
+	path = os.path.join(get_module_path(module, plugin), 
 		os.path.join(dt, dn, dn + '.txt'))
 	
 	ret = import_file_by_path(path, force)

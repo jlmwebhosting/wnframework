@@ -2,11 +2,7 @@
 	border-radius: 5px;
 	padding: 20px;
 	display: inline-block;
-/*	box-shadow: 0 0 4px 1px black;
-	-moz-box-shadow: 0 0 4px 1px black;
-	-webkit-box-shadow: 0 0 4px 1px black;
-	-o-box-shadow: 0 0 4px 1px black;
-*/	margin: auto;
+	margin: auto;
 	text-align: center;
 }
 

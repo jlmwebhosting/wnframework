@@ -10,7 +10,7 @@ import webnotes
 def make(site=None):
 	"""make public folder symlinks if missing"""
 	from webnotes.utils import get_site_base_path, get_base_path, get_path
-	
+	from webnotes.plugins import get_plugin_paths
 	webnotes.init(site=site)
 	
 	site_path = get_site_base_path() if site else get_base_path()
@@ -35,13 +35,11 @@ def make(site=None):
 		]
 		
 		# add plugins
-		plugins_path = get_path("plugins")
-		for plugin in os.listdir(plugins_path):
-			plugin_path =  os.path.join(plugins_path, plugin)
-			if os.path.isdir(plugin_path):
-				plugin_public_path = os.path.join(plugin_path, "public")
-				if os.path.exists(plugin_public_path):
-					symlinks.append((plugin, os.path.join("..", "plugins", plugin, "public")))
+		for plugin_path in get_plugin_paths():
+			plugin_public_path = os.path.join(plugin_path, "public")
+			if os.path.exists(plugin_public_path):
+				plugin = os.path.basename(plugin_path)
+				symlinks.append((plugin, os.path.join("..", "plugins", plugin, "public")))
 
 		os.chdir(public_path)
 

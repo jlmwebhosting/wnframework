@@ -2,7 +2,7 @@
  {
   "creation": "2013-03-09 15:45:57", 
   "docstatus": 0, 
-  "modified": "2013-08-13 19:31:25", 
+  "modified": "2013-12-05 16:04:24", 
   "modified_by": "Administrator", 
   "owner": "Administrator"
  }, 
@@ -64,6 +64,13 @@
   "options": "No\nYes", 
   "read_only": 0, 
   "reqd": 1
+ }, 
+ {
+  "depends_on": "eval:doc.is_standard===\"No\"", 
+  "doctype": "DocField", 
+  "fieldname": "plugin", 
+  "fieldtype": "Data", 
+  "label": "Plugin"
  }, 
  {
   "doctype": "DocField", 

@@ -33,14 +33,13 @@ def make_test_records(doctype, verbose=0):
 			make_test_records_for_doctype(options, verbose)
 
 def get_modules(doctype):
-	module = webnotes.conn.get_value("DocType", doctype, "module")
-	test_module = load_doctype_module(doctype, module, "test_")
+	test_module = load_doctype_module(doctype, "test_")
 	if test_module: reload(test_module)
 
-	return module, test_module
+	return test_module
 
 def get_dependencies(doctype):
-	module, test_module = get_modules(doctype)
+	test_module = get_modules(doctype)
 	
 	options_list = list(set([df.options for df in get_link_fields(doctype)] + [doctype]))
 	
@@ -54,7 +53,7 @@ def get_dependencies(doctype):
 	return options_list
 
 def make_test_records_for_doctype(doctype, verbose=0):
-	module, test_module = get_modules(doctype)
+	test_module = get_modules(doctype)
 	
 	if verbose:
 		print "Making for " + doctype
@@ -131,8 +130,7 @@ def export_doc(doctype, docname):
 		
 
 def run_unittest(doctype, verbose=False):
-	module = webnotes.conn.get_value("DocType", doctype, "module")
-	test_module = get_module_name(doctype, module, "test_")
+	test_module = get_module_name(doctype, "test_")
 	make_test_records(doctype, verbose=verbose)
 
 	try:

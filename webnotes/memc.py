@@ -14,11 +14,11 @@ class MClient(memcache.Client):
 		self.set(self.n(key), val)
 		
 	def get_value(self, key, builder=None):
-		if builder and conf.get("auto_cache_clear") or False:
+		if builder and conf.get("auto_cache_clear"):
 			return builder()
 			
 		val = self.get(self.n(key))
-		if not val and builder:
+		if val==None and builder:
 			val = builder()
 			self.set_value(key, val)
 		return val

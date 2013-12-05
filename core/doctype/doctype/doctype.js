@@ -24,6 +24,9 @@ cur_frm.cscript.onload = function(doc, cdt, cdn) {
 }
 
 cur_frm.cscript.refresh = function(doc, cdt, cdn) {
+	cur_frm.set_df_property("plugin", "read_only", !!!doc.__islocal);
+	cur_frm.cscript.custom(doc);
+	
 	if(in_list(user_roles, 'System Manager') && !in_list(user_roles, 'Administrator')) {
 		// make the document read-only
 		cur_frm.perm = [[1,0,0]]
@@ -37,6 +40,9 @@ cur_frm.cscript.refresh = function(doc, cdt, cdn) {
 	}
 }
 
+cur_frm.cscript.custom = function(doc) {
+	cur_frm.set_df_property("plugin", "reqd", doc.custom);
+} 
 cur_frm.cscript.validate = function(doc, cdt, cdn) {
 	doc.server_code_compiled = null;
 }

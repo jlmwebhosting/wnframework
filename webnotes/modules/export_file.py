@@ -29,11 +29,13 @@ def write_document_file(doclist, record_module=None, create_init=None):
 	doclist = [filter_fields(d.fields) for d in doclist]
 
 	module = record_module or get_module_name(doclist)
+	plugin = doclist[0].get("plugin")
+	
 	if create_init is None:
 		create_init = doclist[0]['doctype'] in lower_case_files_for
 	
 	# create folder
-	folder = create_folder(module, doclist[0]['doctype'], doclist[0]['name'], create_init)
+	folder = create_folder(plugin, module, doclist[0]['doctype'], doclist[0]['name'], create_init)
 	
 	# write the data file	
 	fname = (doclist[0]['doctype'] in lower_case_files_for and scrub(doclist[0]['name'])) or doclist[0]['name']
@@ -72,10 +74,10 @@ def get_module_name(doclist):
 
 	return module
 		
-def create_folder(module, dt, dn, create_init, ):
-	module_path = get_module_path(module)
-
+def create_folder(plugin, module, dt, dn, create_init):
 	dt, dn = scrub_dt_dn(dt, dn)
+
+	module_path = get_module_path(module, plugin)
 	
 	# create folder
 	folder = os.path.join(module_path, dt, dn)

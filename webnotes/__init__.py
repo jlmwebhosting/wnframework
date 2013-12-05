@@ -55,9 +55,9 @@ def set_user_lang(user, user_language=None):
 		if user_language in lang_dict:
 			local.lang = lang_dict[user_language]
 
-def load_translations(module, doctype, name):
+def load_translations(plugin, module, doctype, name):
 	from webnotes.translate import load_doc_messages
-	load_doc_messages(module, doctype, name)
+	load_doc_messages(plugin, module, doctype, name)
 
 
 # local-globals
@@ -234,7 +234,7 @@ def get_db_password(db_name):
 
 whitelisted = []
 guest_methods = []
-def whitelist(allow_guest=False, allow_roles=None):
+def whitelist(allow_guest=False):
 	"""
 	decorator for whitelisting a function
 	
@@ -250,21 +250,16 @@ def whitelist(allow_guest=False, allow_roles=None):
 		if allow_guest:
 			guest_methods.append(fn)
 
-		if allow_roles:
-			roles = get_roles()
-			allowed = False
-			for role in allow_roles:
-				if role in roles:
-					allowed = True
-					break
-			
-			if not allowed:
-				raise PermissionError, "Method not allowed"
-
 		return fn
 	
 	return innerfn
 
+def only_for(roles):
+	if not isinstance(roles, (tuple, list)): roles = (roles,)
+	myroles = get_roles()
+	for role in roles:
+		if not role in myroles:
+			raise webnotes.PermissionError
 
 class HashAuthenticatedCommand(object):
 	def __init__(self):
@@ -479,6 +474,7 @@ def get_method(method_string):
 	return getattr(get_module(modulename), methodname)
 
 def scrub(txt):
+	if not txt: return txt
 	return txt.replace(' ','_').replace('-', '_').replace('/', '_').lower()
 
 def make_property_setter(args):

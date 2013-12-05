@@ -8,7 +8,6 @@ import os, json
 import types
 
 from webnotes import _
-from webnotes.modules import scrub, get_module_path
 from webnotes.utils import flt, cint
 import webnotes.widgets.reportview
 import webnotes.plugins
@@ -17,39 +16,9 @@ import webnotes.plugins
 def get_script(report_name):
 	report = webnotes.doc("Report", report_name)
 	
-	module = webnotes.conn.get_value("DocType", report.ref_doctype, "module")
-	module_path = get_module_path(module)
-	report_folder = os.path.join(module_path, "report", scrub(report.name))
-	script_path = os.path.join(report_folder, scrub(report.name) + ".js")
-	
-	script = None
-	if os.path.exists(script_path):
-		with open(script_path, "r") as script:
-			script = script.read()
-	
-	if not script and report.is_standard == "No":
-		script = webnotes.plugins.get_plugin_asset("report", "js", report.name)
-
-	if not script and report.javascript:
-		script = report.javascript
-	
-	if not script:
-		script = "wn.query_reports['%s']={}" % report_name
-		
-	# load translations
-	if webnotes.lang != "en":
-		from webnotes.translate import get_lang_data
-		if os.path.exists(report_folder):
-			messages = get_lang_data(report_folder, webnotes.lang, 'js')
-			webnotes.response["__messages"] = messages
-		# TODO translations for plugins
-		# else:
-		# 	plugins_report_folder = webnotes.plugins.get_path(module, "Report", report.name)
-		# 	if os.path.exists(plugins_report_folder):
-		# 		messages = get_lang_data(plugins_report_folder, webnotes.lang, 'js')
-		# 		webnotes.response["__messages"] = messages
-		
-	return script
+	webnotes.bean("Report", report_name).get_controller().get_from_files()
+			
+	return report.doc.javascript
 
 @webnotes.whitelist()
 def run(report_name, filters=None):

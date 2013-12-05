@@ -148,7 +148,7 @@ def build_from_query_report():
 			
 			module = get_doctype_module(item.ref_doctype)		
 			if module :
-				doctype_path = get_doc_path(module, "Report", item.name)
+				doctype_path = get_doc_path(item.plugin, module, "Report", item.name)
 				if os.path.exists(doctype_path):
 					for (basepath, folders, files) in os.walk(doctype_path):
 						if 'locale' in folders: folders.remove('locale')
@@ -195,7 +195,7 @@ def build_for_doc_from_database(fields):
 		
 		doc = doclist[0]
 		if doc.fields.get(fields.module_field):
-			doctype_path = get_doc_path(doc.fields[fields.module_field], 
+			doctype_path = get_doc_path(doc.plugin, doc.fields[fields.module_field], 
 				doc.doctype, doc.name)
 			write_messages_file(doctype_path, messages, 'doc')
 	
@@ -336,14 +336,14 @@ def import_messages(lang, infile):
 			_update_lang_file('js')
 			_update_lang_file('py')
 
-def load_doc_messages(module, doctype, name):
+def load_doc_messages(plugin, module, doctype, name):
 	if webnotes.lang=="en":
 		return {}
 
 	if not webnotes.local.translated_docs:
 		webnotes.local.translated_docs = []
 
-	doc_path = get_doc_path(module, doctype, name)
+	doc_path = get_doc_path(plugin, module, doctype, name)
 
 	# don't repload the same doc again
 	if (webnotes.lang + ":" + doc_path) in webnotes.local.translated_docs:

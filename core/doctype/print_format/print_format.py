@@ -81,8 +81,8 @@ def get_html(doc, doclist):
 
 def get_print_format(doctype, format):
 	# server, find template
-	path = os.path.join(get_doc_path(webnotes.conn.get_value("DocType", doctype, "module"), 
-		"Print Format", format), format + ".html")
+	plugin, module = webnotes.conn.get_value("DocType", doctype, ["plugin", "module"])
+	path = os.path.join(get_doc_path(plugin, module, "Print Format", format), format + ".html")
 	if os.path.exists(path):
 		with open(path, "r") as pffile:
 			return pffile.read()
@@ -96,7 +96,7 @@ def get_print_format(doctype, format):
 def get_print_style(style=None):
 	if not style:
 		style = webnotes.conn.get_default("print_style") or "Standard"
-	path = os.path.join(get_doc_path("Core", "DocType", "Print Format"), "styles", 
+	path = os.path.join(get_doc_path(None, "Core", "DocType", "Print Format"), "styles", 
 		style.lower() + ".css")
 	if not os.path.exists(path):
 		if style!="Standard":
