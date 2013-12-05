@@ -11,7 +11,7 @@ from webnotes import _
 from webnotes.modules import scrub, get_module_path
 from webnotes.utils import flt, cint
 import webnotes.widgets.reportview
-import webnotes.plugins import get_report_js, get_report_module
+import webnotes.plugins
 
 @webnotes.whitelist()
 def get_script(report_name):
@@ -28,7 +28,7 @@ def get_script(report_name):
 			script = script.read()
 	
 	if not script and report.is_standard == "No":
-		script = webnotes.plugins.get_plugin_asset("reports", "js", report.name)
+		script = webnotes.plugins.get_plugin_asset("report", "js", report.name)
 
 	if not script and report.javascript:
 		script = report.javascript

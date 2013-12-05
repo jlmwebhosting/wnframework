@@ -8,12 +8,13 @@ from __future__ import unicode_literals
 """
 import webnotes
 import os
-from webnotes.modules.import_file import import_file
+from webnotes.modules.import_file import import_file_by_path
 from webnotes.utils import get_path, cstr
 
 def sync_all(force=0):
 	sync_for("lib", force)
 	sync_for("app", force)
+	sync_for("plugins", force)
 	webnotes.clear_cache()
 
 def sync_for(folder, force=0, sync_everything = False, verbose=False):
@@ -28,7 +29,9 @@ def walk_and_sync(start_path, force=0, sync_everything = False, verbose=False):
 
 	for path, folders, files in os.walk(start_path):
 		# sort folders so that doctypes are synced before pages or reports
-		if 'locale' in folders: folders.remove('locale')
+		for dontwalk in ('locale', '.git', 'public'):
+			if dontwalk in folders: folders.remove(dontwalk)
+			
 		folders.sort()
 
 		if sync_everything or (os.path.basename(os.path.dirname(path)) in document_type):
@@ -37,12 +40,13 @@ def walk_and_sync(start_path, force=0, sync_everything = False, verbose=False):
 				if f.endswith(".txt"):
 					doc_name = f.split(".txt")[0]
 					if doc_name == os.path.basename(path):
+						
 
 						module_name = path.split(os.sep)[-3]
 						doctype = path.split(os.sep)[-2]
 						name = path.split(os.sep)[-1]
 						
-						if import_file(module_name, doctype, name, force=force) and verbose:
+						if import_file_by_path(os.path.join(path, f), force) and verbose:
 							print module_name + ' | ' + doctype + ' | ' + name
 
 						webnotes.conn.commit()

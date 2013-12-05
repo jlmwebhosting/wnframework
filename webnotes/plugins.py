@@ -36,7 +36,7 @@ def get_plugin_asset(group, asset_type, name):
 	return asset
 
 def load_plugin_mapping():
-	if getattr(webnotes, "plugin_mapping", None)==None:
+	if not webnotes.plugin_mapping:
 		webnotes.plugin_mapping = {
 			"doctype":{"controller":{}, "js":{}}, 
 			"report":{"controller":{}, "js":{}}
@@ -73,8 +73,8 @@ def load_plugin_mapping():
 	return webnotes.plugin_mapping
 				
 def clear_cache(doctype=None, docname=None):
-	del webnotes.plugin_mapping
-	del webnotes.plugin_cache
+	webnotes.plugin_mapping = None
+	webnotes.plugin_cache = None
 	
 	
 	

@@ -14,6 +14,7 @@ def make(site=None):
 	webnotes.init(site=site)
 	
 	site_path = get_site_base_path() if site else get_base_path()
+	public_path = webnotes.conf.get("public_path", "public")
 	
 	# setup standard folders
 	for param in (("public_path", "public"), ("backup_path", "public/backups"), ("files_path", "public/files")):
@@ -24,15 +25,25 @@ def make(site=None):
 	# setup js and css folders
 	if not site:
 		for folder in ("js", "css"):
-			path = get_path(webnotes.conf.get("public_path", "public"), folder)
+			path = get_path(public_path, folder)
 			if not os.path.exists(path):
 				os.mkdir(path)
 		
-		os.chdir(webnotes.conf.get("public_path", "public"))
 		symlinks = [
-			["app", "../app/public"],
-			["lib", "../lib/public"],
+			("app", "../app/public"),
+			("lib", "../lib/public"),
 		]
+		
+		# add plugins
+		plugins_path = get_path("plugins")
+		for plugin in os.listdir(plugins_path):
+			plugin_path =  os.path.join(plugins_path, plugin)
+			if os.path.isdir(plugin_path):
+				plugin_public_path = os.path.join(plugin_path, "public")
+				if os.path.exists(plugin_public_path):
+					symlinks.append((plugin, os.path.join("..", "plugins", plugin, "public")))
+
+		os.chdir(public_path)
 
 		for link in symlinks:
 			if not os.path.exists(link[0]) and os.path.exists(link[1]):

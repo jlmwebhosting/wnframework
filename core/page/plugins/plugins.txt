@@ -1,0 +1,33 @@
+[
+ {
+  "creation": "2013-12-05 12:14:40", 
+  "docstatus": 0, 
+  "modified": "2013-12-05 12:14:47", 
+  "modified_by": "Administrator", 
+  "owner": "Administrator"
+ }, 
+ {
+  "doctype": "Page", 
+  "icon": "icon-magic", 
+  "module": "Core", 
+  "name": "__common__", 
+  "page_name": "plugins", 
+  "standard": "Yes", 
+  "title": "Plugin Manager"
+ }, 
+ {
+  "doctype": "Page Role", 
+  "name": "__common__", 
+  "parent": "plugins", 
+  "parentfield": "roles", 
+  "parenttype": "Page", 
+  "role": "System Manager"
+ }, 
+ {
+  "doctype": "Page", 
+  "name": "plugins"
+ }, 
+ {
+  "doctype": "Page Role"
+ }
+]

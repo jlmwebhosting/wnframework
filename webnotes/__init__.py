@@ -77,6 +77,8 @@ debug_log = local("debug_log")
 message_log = local("message_log")
 
 lang = local("lang")
+plugin_mapping = None
+plugin_cache = None
 
 def init(site=None):
 	if getattr(local, "initialised", None):
@@ -476,7 +478,7 @@ def get_method(method_string):
 
 	return getattr(get_module(modulename), methodname)
 
-def scrub():
+def scrub(txt):
 	return txt.replace(' ','_').replace('-', '_').replace('/', '_').lower()
 
 def make_property_setter(args):

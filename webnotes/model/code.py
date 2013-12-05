@@ -19,7 +19,7 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 	# for test
 	import webnotes
 	from webnotes.modules import scrub, get_doctype_module
-	from webnotes.plugins import get_plugin_controller
+	from webnotes.plugins import get_plugin_asset
 
 	# get doctype details
 	module = get_doctype_module(doc.doctype) or "core"
@@ -33,9 +33,9 @@ def get_server_obj(doc, doclist = [], basedoctype = ''):
 		return DocType(doc, doclist)
 
 	# custom?
-	plugin_controller = get_plugin_controller(doc.doctype)
+	plugin_controller = get_plugin_asset("doctype", "controller", doc.doctype)
 	if plugin_controller:
-		return plugin_controller(doc, doclist)
+		return plugin_controller.CustomDocType(doc, doclist)
 	else:
 		return DocType(doc, doclist)
 
@@ -50,10 +50,6 @@ def get_doctype_class(doctype, module):
 		if not cint(webnotes.conn.get_value("DocType", doctype, "custom")):
 			raise ImportError, "Unable to load module for: " + doctype
 		
-		class DocType:
-			def __init__(self, d, dl):
-				self.doc, self.doclist = d, dl
-
 	return DocType
 
 def get_module_name(doctype, module, prefix):
